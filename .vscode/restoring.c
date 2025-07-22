@@ -1,148 +1,149 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <conio.h>
+#include <math.h>
 
-// Function to convert binary string to decimal integer
-int binToDec(char *bin) {
-    int dec = 0;
-    while (*bin) {
-        dec = (dec << 1) + (*bin++ - '0');
-    }
-    return dec;
+int a=0,b=0,c=0,com[5]={1,0,0,0,0},s=0;
+int anum[5]={0},anumcp[5] ={0},bnum[5]={0};
+int acomp[5]={0},bcomp[5]={0},rem[5]={0},quo[5]={0},res[5]={0};
+
+void binary(){
+     a = fabs(a);
+     b = fabs(b);
+     int r, r2, i, temp;
+     for(i = 0; i < 5; i++){
+           r = a % 2;
+           a = a / 2;
+           r2 = b % 2;
+           b = b / 2;
+           anum[i] = r;
+           anumcp[i] = r;
+           bnum[i] = r2;
+           if(r2 == 0){
+                bcomp[i] = 1;
+           }
+           if(r == 0){
+                acomp[i] =1;
+           }
+     }
+   //part for two's complementing
+   c = 0;
+   for( i = 0; i < 5; i++){
+           res[i] = com[i]+ bcomp[i] + c;
+           if(res[i]>=2){
+                c = 1;
+           }
+           else
+                c = 0;
+           res[i] = res[i]%2;
+     }
+   for(i = 4; i>= 0; i--){
+     bcomp[i] = res[i];
+   }
+}
+void add(int num[]){
+     int i;
+     c = 0;
+     for( i = 0; i < 5; i++){
+           res[i] = rem[i]+ num[i] + c;
+           if(res[i]>=2){
+                c = 1;
+           }
+           else
+                c = 0;
+           res[i] = res[i]%2;
+     }
+     for(i = 4; i>= 0; i--){
+           rem[i] = res[i];
+           printf("%d",rem[i]);
+     }
+     printf(":");
+     for(i = 4; i>= 0; i--){
+           printf("%d",anumcp[i]);
+     }
+}
+void shl(){//for shift left
+     int i;
+     for(i = 4; i > 0  ; i--){//shift the remainder
+           rem[i] = rem[i-1];
+     }
+     rem[0] = anumcp[4];
+     for(i = 4; i > 0  ; i--){//shift the remtient
+           anumcp[i] = anumcp[i-1];
+     }
+     anumcp[0] = 0;
+     printf("\nSHIFT LEFT: ");//display together
+     for(i = 4; i>= 0; i--){
+           printf("%d",rem[i]);
+     }
+     printf(":");
+     for(i = 4; i>= 0; i--){
+           printf("%d",anumcp[i]);
+     }
 }
 
-// Function to convert decimal integer to binary string
-void decToBin(int num, char *bin, int bits) {
-    bin[bits] = '\0';
-    int i;
-    for (i = bits - 1; i >= 0; --i, num >>= 1) {
-        bin[i] = (num & 1) ? '1' : '0';
-    }
+int main(){
+     int i;
+     printf("\t\tRESTORING DIVISION ALGORITHM");
+     printf("\nEnter two numbers to multiply: ");
+     printf("\nBoth must be less than 16");
+     //simulating for two numbers each below 16
+     do{
+           printf("\nEnter A: ");
+           scanf("%d",&a);
+           printf("Enter B: ");
+           scanf("%d",&b);
+     }while(a>=16 || b>=16);
+
+     printf("\nExpected Quotient = %d", a/b);
+     printf("\nExpected Remainder = %d", a%b);
+     if(a*b <0){
+           s = 1;
+     }
+
+     binary();
+     printf("\n\nUnsigned Binary Equivalents are: ");
+     printf("\nA = ");
+     for(i = 4; i>= 0; i--){
+           printf("%d",anum[i]);
+     }
+     printf("\nB = ");
+     for(i = 4; i>= 0; i--){
+           printf("%d",bnum[i]);
+     }
+     printf("\nB'+ 1 = ");
+     for(i = 4; i>= 0; i--){
+           printf("%d",bcomp[i]);
+     }
+     printf("\n\n-->");
+     //division part
+     shl();
+     for(i=0;i<5;i++){
+           printf("\n-->"); //start with subtraction
+           printf("\nSUB B: ");
+           add(bcomp);
+           if(rem[4]==1){//simply add for restoring
+                printf("\n-->RESTORE");
+                printf("\nADD B: ");
+                anumcp[0] = 0;
+                add(bnum);
+           }
+           else{
+                anumcp[0] = 1;
+           }
+           if(i<4)
+                shl();
+
+     }
+     printf("\n----------------------------");
+     printf("\nSign of the result = %d",s);
+     printf("\nRemainder is = ");
+     for(i = 4; i>= 0; i--){
+           printf("%d",rem[i]);
+     }
+     printf("\nQuotient is = ");
+     for(i = 4; i>= 0; i--){
+           printf("%d",anumcp[i]);
+     }
+getch();
+
 }
-
-// Function to add two binary numbers
-void add(char* A, const char* M, char* Sum, int length) {
-    int carry = 0,i;
-    // Iterating through the number A
-    for (i = length - 1; i >= 0; i--) {
-        // Adding the values at both the indices along with the carry
-        int temp = (A[i] - '0') + (M[i] - '0') + carry;
-        // If the binary number exceeds 1
-        if (temp > 1) {
-            Sum[i] = (temp % 2) + '0';
-            carry = 1;
-        } else {
-            Sum[i] = temp + '0';
-            carry = 0;
-        }
-    }
-    Sum[length] = '\0';
-}
-
-// Function to subtract two binary numbers
-void subtract(char* A, const char* M, char* Diff, int length) {
-    int borrow = 0, i ;
-    // Iterating through the number A
-    for (i = length - 1; i >= 0; i--) {
-        // Subtracting the values at both the indices along with the borrow
-        int temp = (A[i] - '0') - (M[i] - '0') - borrow;
-        // If the binary number goes below 0
-        if (temp < 0) {
-            Diff[i] = (temp + 2) + '0';
-            borrow = 1;
-        } else {
-            Diff[i] = temp + '0';
-            borrow = 0;
-        }
-    }
-    Diff[length] = '\0';
-}
-
-// Function to left shift a binary number
-void leftShift(char* A, char* Q, int length) {
-	int i;
-    for (i = 0; i < length - 1; i++) {
-        A[i] = A[i + 1];
-    }
-    A[length - 1] = Q[0];
-    for (i = 0; i < length - 1; i++) {
-        Q[i] = Q[i + 1];
-    }
-    Q[length - 1] = '0';
-}
-
-// Function to print binary number
-void printBinary(char* bin) {
-    printf("%s", bin);
-}
-
-// Function to perform non-restoring division
-void nonRestoringDivision(char* Q, char* M, char* A, int bits) {
-    char temp[bits + 1];
-    int count = bits;
-    
-    printf("Initial Values: A: %s Q: %s M: %s\n", A, Q, M);
-    
-    while (count > 0) {
-        // Step 2: Check sign of A and perform the appropriate operation
-        if (A[0] == '1') {
-            leftShift(A, Q, bits);
-            add(A, M, temp, bits);
-            strcpy(A, temp);
-            printf("After left shift and add: A: %s Q: %s\n", A, Q);
-        } else {
-            leftShift(A, Q, bits);
-            subtract(A, M, temp, bits);
-            strcpy(A, temp);
-            printf("After left shift and subtract: A: %s Q: %s\n", A, Q);
-        }
-
-        // Step 3: Set Q0 based on the sign of A
-        if (A[0] == '0') {
-            Q[bits - 1] = '1';
-        } else {
-            Q[bits - 1] = '0';
-        }
-
-        count--;
-    }
-
-    // Step 5: Final correction of the remainder
-    if (A[0] == '1') {
-        add(A, M, temp, bits);
-        strcpy(A, temp);
-    }
-
-    printf("\nQuotient(Q): ");
-    printBinary(Q);
-    printf(" Remainder(A): ");
-    printBinary(A);
-    printf("\n");
-}
-
-int main() {
-    char dividend[65], divisor[65];
-    int bitLength;
-
-    printf("Enter the dividend (binary): ");
-    scanf("%s", dividend);
-    printf("Enter the divisor (binary): ");
-    scanf("%s", divisor);
-
-    bitLength = strlen(dividend);
-
-    // Ensure that the binary numbers have the same length
-    char Q[bitLength + 1];
-    char M[bitLength + 1];
-    char A[bitLength + 1];
-
-    strcpy(Q, dividend);
-    strcpy(M, divisor);
-    memset(A, '0', bitLength);
-    A[bitLength] = '\0';
-
-    nonRestoringDivision(Q, M, A, bitLength);
-
-    return 0;
-}
-
